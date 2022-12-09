@@ -10,6 +10,10 @@ modules:
     SPRING_PROFILES_ACTIVE: cloud
     DESTINATION_GTT: gtt_core_engine_flp_base_url
     HERE_MAP_KEY: {here-map-license-key}
+  provides:
+    - name: lbn-gtt-sst-api
+      properties:
+        srv-url: ${default-url}
   parameters:
     buildpack: java_buildpack
     health-check-timeout: 180
@@ -22,8 +26,46 @@ modules:
   requires:
   - name: lbn-gtt-sample-app-uaa
   - name: lbn-gtt-sample-destination
+
 resources:
-- name: lbn-gtt-sample-app-uaa
-  type: org.cloudfoundry.existing-service
-- name: lbn-gtt-sample-destination
-  type: org.cloudfoundry.existing-service
+  # ------------------------------------------------------------
+  - name: lbn-gtt-sample-destination
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: lbn-gtt-sst-api
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Name: lbn-gtt-sst-api
+                Authentication: NoAuthentication
+                ProxyType: Internet
+                Type: HTTP
+                URL: ~{lbn-gtt-sst-api/srv-url}
+                HTML5.DynamicDestination: true
+                HTML5.ForwardAuthToken: true
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: lbn-gtt-sample-destination
+      service-plan: lite
+
+  # ------------------------------------------------------------
+  - name: lbn-gtt-sample-app-uaa
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: gtt-ui-sample-${space}
+        tenant-mode: dedicated

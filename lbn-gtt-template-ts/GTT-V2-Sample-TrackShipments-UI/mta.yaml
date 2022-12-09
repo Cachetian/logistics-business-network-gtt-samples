@@ -12,7 +12,7 @@ modules:
       - name: gtt-ui-sample-track-shipments-app-host
         parameters:
           content-target: true
-      - name: gtt-ui-sample-track-shipments-destination-service
+      - name: lbn-gtt-sample-destination
     build-parameters:
       build-result: resources
       requires:
@@ -35,7 +35,7 @@ modules:
       supported-platforms: []
 
   # ------------------ DESTINATION CONTENT ---------------------
-  - name: gtt-ui-sample-track-shipments-destination-service-content
+  - name: lbn-gtt-sample-destination-content
   # ------------------------------------------------------------
     type: com.sap.application.content
     requires:
@@ -43,13 +43,13 @@ modules:
         parameters:
           service-key:
             name: gtt-ui-sample-track-shipments-app-host-key
-      - name: gtt-ui-sample-track-shipments-destination-service
+      - name: lbn-gtt-sample-destination
         parameters:
           content-target: true
-      - name: gtt-ui-sample-track-shipments-uaa
+      - name: lbn-gtt-sample-app-uaa
         parameters:
           service-key:
-            name: gtt-ui-sample-track-shipments-uaa-key
+            name: lbn-gtt-sample-app-uaa-key
     parameters:
       content:
         instance:
@@ -59,10 +59,10 @@ modules:
               ServiceInstanceName: gtt-ui-sample-track-shipments-app-host
               ServiceKeyName: gtt-ui-sample-track-shipments-app-host-key
               sap.cloud.service: lbn.gtt.sample.app
-            - Name: gtt-ui-sample-track-shipments-uaa
+            - Name: lbn-gtt-sample-app-uaa
               Authentication: OAuth2UserTokenExchange
-              ServiceInstanceName: gtt-ui-sample-track-shipments-uaa
-              ServiceKeyName: gtt-ui-sample-track-shipments-uaa-key
+              ServiceInstanceName: lbn-gtt-sample-app-uaa
+              ServiceKeyName: lbn-gtt-sample-app-uaa-key
               sap.cloud.service: lbn.gtt.sample.app
     build-parameters:
       no-source: true
@@ -76,38 +76,11 @@ resources:
       service: html5-apps-repo
       service-plan: app-host
 
-  # ------------------------------------------------------------
-  - name: gtt-ui-sample-track-shipments-destination-service
-  # ------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      config:
-        HTML5Runtime_enabled: true
-        init_data:
-          instance:
-            destinations:
-              - Authentication: NoAuthentication
-                Name: ui5
-                ProxyType: Internet
-                Type: HTTP
-                URL: https://ui5.sap.com
-            existing_destinations_policy: update
-        version: 1.0.0
-      service: destination
-      service-name: gtt-ui-sample-track-shipments-destination-service
-      service-plan: lite
+  - name: lbn-gtt-sample-app-uaa
+    type: org.cloudfoundry.existing-service
 
-  # ------------------------------------------------------------
-  - name: gtt-ui-sample-track-shipments-uaa
-  # ------------------------------------------------------------
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: gtt-ui-sample-${space}
-        tenant-mode: dedicated
+  - name: lbn-gtt-sample-destination
+    type: org.cloudfoundry.existing-service
 
 parameters:
   deploy_mode: html5-repo

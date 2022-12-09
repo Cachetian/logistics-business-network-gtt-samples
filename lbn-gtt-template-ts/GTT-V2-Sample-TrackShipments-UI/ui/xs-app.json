@@ -15,6 +15,12 @@
       "destination": "ui5"
     },
     {
+      "source": "^/trackshipments/sap/logistics/gtt/sample/sst/(.*)$",
+      "target": "/sap/logistics/gtt/sample/sst/$1",
+      "destination": "lbn-gtt-sst-api",
+      "authenticationType": "xsuaa"
+    },
+    {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",
