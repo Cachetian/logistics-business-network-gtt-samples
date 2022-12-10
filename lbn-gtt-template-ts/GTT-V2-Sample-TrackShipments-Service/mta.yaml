@@ -17,7 +17,7 @@ modules:
   parameters:
     buildpack: java_buildpack
     health-check-timeout: 180
-    host: gtt-sample-track-shipments-service-{unique-identifier}
+    host: gtt-sample-track-shipments-service
   build-parameters:
     ignore:
     - "*.md"
