@@ -43,10 +43,11 @@ public abstract class BaseRuntimeException extends RuntimeException {
         if (!StringUtils.isBlank(msg)) {
             return msg;
         }
-        // OOM
-        // if (!StringUtils.isBlank(this.getMessageCode())) {
-        //     msg = this.getLocalizedMessage(Locale.ENGLISH);
-        // }
+        /* Prevent OOM
+        if (!StringUtils.isBlank(this.getMessageCode())) {
+            msg = this.getLocalizedMessage(Locale.ENGLISH);
+        }
+        */
         return msg;
     }
 
