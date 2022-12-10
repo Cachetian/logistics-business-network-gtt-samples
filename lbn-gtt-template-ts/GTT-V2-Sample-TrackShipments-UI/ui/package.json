@@ -1,6 +1,6 @@
 {
-  "name": "com.sap.gtt.app.sample.sst",
-  "version": "0.0.1",
+  "name": "gtt-v2-ui-sample-track-shipments",
+  "version": "2.0.0",
   "description": "GTT Sample Track Shipments UI",
   "license": "ISC",
   "author": "SAP SE",
