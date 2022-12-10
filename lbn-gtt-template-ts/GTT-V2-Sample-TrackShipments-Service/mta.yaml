@@ -65,7 +65,48 @@ resources:
     parameters:
       service: xsuaa
       service-plan: application
-      path: ./xs-security.json
       config:
-        xsappname: gtt-ui-sample-${space}
+        xsappname: tt_sof_${space}
         tenant-mode: dedicated
+        oauth2-configuration:
+          system-attributes:
+            - rolecollections
+        description: Security profile of sales order fulfillment application
+        scopes:
+          - name: "$XSAPPNAME.sof.r"
+            description: Allow to access sales order fulfillment application
+          - name: "$XSAPPNAME.pof.r"
+            description: Allow to access purchase order fulfillment application
+          - name: "$XSAPPNAME.sst.r"
+            description: Allow to access standalone shipment tracking application
+          - name: "$XSAPPNAME.sst.w"
+            description: Allow to report events in standalone shipment tracking application
+          - name: uaa.user
+            description: UAA
+        authorities:
+          - "$XSAPPNAME.sof.r"
+          - "$XSAPPNAME.pof.r"
+          - "$XSAPPNAME.sst.r"
+          - "$XSAPPNAME.sst.w"
+          - uaa.user
+        role-templates:
+          - name: SalesOrderFulfillmentAppUserDisplayTemplate
+            description: Track & Trace Sales Order Fulfillment Template App User Read Access
+            scope-references:
+              - "$XSAPPNAME.sof.r"
+              - uaa.user
+          - name: PurchaseOrderFulfillmentAppUserDisplayTemplate
+            description: Track & Trace Purchase Order Fulfillment Template App User Read Access
+            scope-references:
+              - "$XSAPPNAME.pof.r"
+              - uaa.user
+          - name: StandaloneShipmentTrackingAppUserDisplayTemplate
+            description: Track & Trace Standalone Shipment Tracking Template App User Read Access
+            scope-references:
+              - "$XSAPPNAME.sst.r"
+              - uaa.user
+          - name: StandaloneShipmentTrackingAppUserProcessTemplate
+            description: Track & Trace Standalone Shipment Tracking Template App User Write Access
+            scope-references:
+              - "$XSAPPNAME.sst.w"
+              - uaa.user
