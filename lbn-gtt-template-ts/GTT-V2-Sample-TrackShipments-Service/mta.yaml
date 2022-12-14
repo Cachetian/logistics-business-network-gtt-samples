@@ -10,10 +10,14 @@ modules:
     SPRING_PROFILES_ACTIVE: cloud
     DESTINATION_GTT: gtt_core_engine_flp_base_url
     HERE_MAP_KEY: {here-map-license-key}
+  provides:
+    - name: lbn-gtt-sst-api
+      properties:
+        srv-url: ${default-url}
   parameters:
     buildpack: java_buildpack
     health-check-timeout: 180
-    host: gtt-sample-track-shipments-service-{unique-identifier}
+    host: gtt-sample-track-shipments-service
   build-parameters:
     ignore:
     - "*.md"
@@ -22,8 +26,87 @@ modules:
   requires:
   - name: lbn-gtt-sample-app-uaa
   - name: lbn-gtt-sample-destination
+
 resources:
-- name: lbn-gtt-sample-app-uaa
-  type: org.cloudfoundry.existing-service
-- name: lbn-gtt-sample-destination
-  type: org.cloudfoundry.existing-service
+  # ------------------------------------------------------------
+  - name: lbn-gtt-sample-destination
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: lbn-gtt-sst-api
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Name: lbn-gtt-sst-api
+                Authentication: NoAuthentication
+                ProxyType: Internet
+                Type: HTTP
+                URL: ~{lbn-gtt-sst-api/srv-url}
+                HTML5.DynamicDestination: true
+                HTML5.ForwardAuthToken: true
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: lbn-gtt-sample-destination
+      service-plan: lite
+
+  # ------------------------------------------------------------
+  - name: lbn-gtt-sample-app-uaa
+  # ------------------------------------------------------------
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      config:
+        xsappname: tt_sof_${space}
+        tenant-mode: dedicated
+        oauth2-configuration:
+          system-attributes:
+            - rolecollections
+        description: Security profile of sales order fulfillment application
+        scopes:
+          - name: "$XSAPPNAME.sof.r"
+            description: Allow to access sales order fulfillment application
+          - name: "$XSAPPNAME.pof.r"
+            description: Allow to access purchase order fulfillment application
+          - name: "$XSAPPNAME.sst.r"
+            description: Allow to access standalone shipment tracking application
+          - name: "$XSAPPNAME.sst.w"
+            description: Allow to report events in standalone shipment tracking application
+          - name: uaa.user
+            description: UAA
+        authorities:
+          - "$XSAPPNAME.sof.r"
+          - "$XSAPPNAME.pof.r"
+          - "$XSAPPNAME.sst.r"
+          - "$XSAPPNAME.sst.w"
+          - uaa.user
+        role-templates:
+          - name: SalesOrderFulfillmentAppUserDisplayTemplate
+            description: Track & Trace Sales Order Fulfillment Template App User Read Access
+            scope-references:
+              - "$XSAPPNAME.sof.r"
+              - uaa.user
+          - name: PurchaseOrderFulfillmentAppUserDisplayTemplate
+            description: Track & Trace Purchase Order Fulfillment Template App User Read Access
+            scope-references:
+              - "$XSAPPNAME.pof.r"
+              - uaa.user
+          - name: StandaloneShipmentTrackingAppUserDisplayTemplate
+            description: Track & Trace Standalone Shipment Tracking Template App User Read Access
+            scope-references:
+              - "$XSAPPNAME.sst.r"
+              - uaa.user
+          - name: StandaloneShipmentTrackingAppUserProcessTemplate
+            description: Track & Trace Standalone Shipment Tracking Template App User Write Access
+            scope-references:
+              - "$XSAPPNAME.sst.w"
+              - uaa.user
